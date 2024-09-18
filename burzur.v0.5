@@ -1,0 +1,256 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Bezur X Hub ⚪ | Universal",
+   LoadingTitle = "Loading Bezur X Hub...",
+   LoadingSubtitle = "by buis_2",
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Bezur_X_Hub"
+   },
+   Discord = {
+      Enabled = true,
+      Invite = "QqHWRZ9t9d", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Bezur X - key",
+      Subtitle = "Key in Discord",
+      Note = "Discord : QqHWRZ9t9d",
+      FileName = "Bezur_X_Hub_Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"https://pastebin.com/raw/csxq0hi9"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local MainTab = Window:CreateTab("Main 🏠", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Player 🚶‍♂️")
+
+Rayfield:Notify({
+   Title = "Bezur X Loaded",
+   Content = "Script loaded!",
+   Duration = 5,
+   Image = nil,
+   Actions = { -- Notification Buttons
+      Ignore = {
+         Name = "Good!",
+         Callback = function()
+         print("Bezur X Hub ⚪ | Universal")
+        print("Loaded!")
+      end
+   },
+},
+})
+
+local Slider = MainTab:CreateSlider({
+   Name = "WalkSpeed 🏃‍♂️",
+   Range = {0, 300},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+   end,
+})
+
+local Slider = MainTab:CreateSlider({
+   Name = "JumpPower 🏃‍♂️",
+   Range = {0, 300},
+   Increment = 1,
+   Suffix = "Power",
+   CurrentValue = 50,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = (Value)
+   end,
+})
+
+local Toggle = MainTab:CreateToggle({
+   Name = "Infinite Jump 🎈",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        --Toggles the infinite jump between on or off on every script run
+_G.infinjump = not _G.infinjump
+
+if _G.infinJumpStarted == nil then
+	--Ensures this only runs once to save resources
+	_G.infinJumpStarted = true
+
+	--The actual infinite jump
+	local plr = game:GetService('Players').LocalPlayer
+	local m = plr:GetMouse()
+	m.KeyDown:connect(function(k)
+		if _G.infinjump then
+			if k:byte() == 32 then
+			humanoid = game:GetService'Players'.LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+			humanoid:ChangeState('Jumping')
+			wait()
+			humanoid:ChangeState('Seated')
+			end
+		end
+	end)
+end
+   end,
+})
+
+local MainTab = Window:CreateTab("Visuals 🧿", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Esp 🔮")
+
+local Button = MainTab:CreateButton({
+   Name = "Chams ⚪⚫ (double click)",
+   Callback = function()
+        local Players = game:GetService("Players")
+
+-- Table to keep track of player highlight states
+local playerStates = {}
+
+-- Variable to keep track of the global highlight state
+local globalHighlightEnabled = true
+
+local function createHighlight(character)
+    local highlight = Instance.new("Highlight")
+    highlight.FillColor = Color3.new(1, 1, 1) -- White color
+    highlight.OutlineColor = Color3.new(0, 0, 0) -- Black outline
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.Adornee = character
+    highlight.Parent = character
+    return highlight
+end
+
+local function applyHighlight(player)
+    local character = player.Character
+    if character and not character:FindFirstChild("Highlight") then
+        createHighlight(character)
+    end
+end
+
+local function removeHighlight(player)
+    local character = player.Character
+    if character then
+        local highlight = character:FindFirstChild("Highlight")
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+end
+
+local function updatePlayerHighlight(player)
+    if globalHighlightEnabled and playerStates[player] then
+        applyHighlight(player)
+    else
+        removeHighlight(player)
+    end
+end
+
+local function toggleHighlight(player)
+    playerStates[player] = not playerStates[player]
+    updatePlayerHighlight(player)
+end
+
+local function onCharacterAdded(player, character)
+    updatePlayerHighlight(player)
+end
+
+local function onPlayerAdded(player)
+    playerStates[player] = true  -- Set to true by default
+    player.CharacterAdded:Connect(function(character)
+        onCharacterAdded(player, character)
+    end)
+    if player.Character then
+        onCharacterAdded(player, player.Character)
+    end
+end
+
+local function onPlayerRemoving(player)
+    playerStates[player] = nil
+end
+
+local function toggleAllHighlights()
+    globalHighlightEnabled = not globalHighlightEnabled
+    for _, player in ipairs(Players:GetPlayers()) do
+        updatePlayerHighlight(player)
+    end
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+Players.PlayerRemoving:Connect(onPlayerRemoving)
+
+-- Handle existing players
+for _, player in ipairs(Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
+
+-- Function to run the script
+local function runScript()
+    toggleAllHighlights()
+end
+
+-- Create a BindableFunction to run the script
+local bindableFunction = Instance.new("BindableFunction")
+bindableFunction.Name = "ToggleHighlights"
+bindableFunction.Parent = game:GetService("ReplicatedStorage")
+bindableFunction.OnInvoke = runScript
+
+game.ReplicatedStorage.ToggleHighlights:Invoke()
+   end,
+})
+
+local Button = MainTab:CreateButton({
+   Name = "Name Tags 💭",
+   Callback = function()
+        local Players = game:GetService("Players")
+
+local function createNameTag(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    
+    -- Remove the default overhead name tag
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+    humanoid.NameDisplayDistance = 0
+    humanoid.HealthDisplayDistance = 0
+    
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Name = "CustomNameTag"
+    billboardGui.AlwaysOnTop = true
+    billboardGui.Size = UDim2.new(0, 100, 0, 40)
+    billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Name = "NameLabel"
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.Text = player.Name
+    
+    textLabel.Parent = billboardGui
+    billboardGui.Parent = humanoidRootPart
+end
+
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(function()
+        createNameTag(player)
+    end)
+    
+    if player.Character then
+        createNameTag(player)
+    end
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+   end,
+})
